@@ -38,6 +38,12 @@ describe("ClientNode", () => {
     clientNode.networkManager = mockNetworkManager;
   });
 
+  afterEach(() => {
+    // Cleanup code to stop the client node
+    clientNode.stop();
+    process.removeAllListeners("submitOrder");
+  });
+
   describe("Order Submission and Matching", () => {
     test("should submit a new order and match it locally if possible", async () => {
       const testOrder = { type: "buy", price: 100, quantity: 5 };

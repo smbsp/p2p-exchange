@@ -108,6 +108,16 @@ class ClientNode {
       }
     });
   }
+
+  // Stop the link and peer to clean up resources
+  stop() {
+    if (this.link) {
+      this.link.stop();
+    }
+    if (this.peer) {
+      this.peer.stop(); // Make sure the PeerRPCClient or its base class has a stop method
+    }
+  }
 }
 
 module.exports = ClientNode;
