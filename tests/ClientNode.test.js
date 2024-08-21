@@ -1,14 +1,14 @@
 // ClientNode.test.js
 // This file contains unit tests for the ClientNode class, focusing on order submission, order matching, and network communication.
 
-const ClientNode = require("../client/ClientNode");
-const OrderBook = require("../client/OrderBook");
-const Order = require("../client/Order");
-const NetworkManager = require("../client/NetworkManager");
+const ClientNode = require("../src/client/ClientNode");
+const OrderBook = require("../src/client/OrderBook");
+const Order = require("../src/client/Order");
+const NetworkManager = require("../src/client/NetworkManager");
 
 // Mocking the NetworkManager and Logger
-jest.mock("../client/NetworkManager");
-jest.mock("../utils/Logger", () => ({
+jest.mock("../src/client/NetworkManager");
+jest.mock("../src/utils/Logger.js", () => ({
   info: jest.fn(),
   error: jest.fn(),
 }));
@@ -134,7 +134,7 @@ describe("ClientNode", () => {
 
     test("should handle errors when receiving orders from the network", () => {
       // Mock the logger
-      const Logger = require("../utils/Logger");
+      const Logger = require("../src/utils/Logger");
 
       // Simulate an error in receiving orders
       mockNetworkManager.listenForOrders.mockImplementation((callback) => {

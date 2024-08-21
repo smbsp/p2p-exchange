@@ -1,8 +1,8 @@
 // OrderBook.test.js
 // This file contains unit tests for the OrderBook class, focusing on adding orders, sorting, and matching functionality.
 
-const OrderBook = require("../client/OrderBook");
-const Order = require("../client/Order");
+const OrderBook = require("../src/client/OrderBook");
+const Order = require("../src/client/Order");
 
 describe("OrderBook", () => {
   let orderBook;
