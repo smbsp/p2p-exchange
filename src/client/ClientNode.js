@@ -7,22 +7,12 @@ const NetworkManager = require("./NetworkManager"); // Manages the communication
 const Logger = require("../utils/Logger"); // Utility for logging
 
 class ClientNode {
-  constructor(grapeAddress) {
-    // Initialize the DHT link
-    this.link = new Link({
-      grape: grapeAddress,
-    });
-    this.link.start();
-
-    // Initialize Grenache peer (client node)
-    this.peer = new Grenache.PeerRPCClient(this.link, {});
-    this.peer.init();
-
+  constructor() {
     // Initialize the local order book
     this.orderBook = new OrderBook();
 
     // Initialize the network manager for handling communication
-    this.networkManager = new NetworkManager(this.peer);
+    this.networkManager = new NetworkManager();
 
     // Bind event handlers
     this.setupEventHandlers();
@@ -107,16 +97,6 @@ class ClientNode {
         Logger.info("Added incoming order to the local order book");
       }
     });
-  }
-
-  // Stop the link and peer to clean up resources
-  stop() {
-    if (this.link) {
-      this.link.stop();
-    }
-    if (this.peer) {
-      this.peer.stop(); // Make sure the PeerRPCClient or its base class has a stop method
-    }
   }
 }
 
