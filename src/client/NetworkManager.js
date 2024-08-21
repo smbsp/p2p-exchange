@@ -2,26 +2,48 @@
 // This file handles all communication between the client nodes in the P2P exchange system using Grenache.
 
 const Logger = require("../utils/Logger");
-const { PeerRPCClient } = require("grenache-nodejs-http");
+const { PeerRPCClient, PeerRPCServer } = require("grenache-nodejs-http");
+const Link = require("grenache-nodejs-link");
 
 class NetworkManager {
   /**
-   * Constructs a new NetworkManager object.
-   * @param {PeerRPCClient} peerClient - An instance of Grenache's PeerRPCClient for sending and receiving messages.
+   * Constructs a new NetworkManager object with both client and server capabilities.
+   * @param {Object} config - Configuration object containing grape, port, and other necessary details.
    */
-  constructor(peerClient) {
-    this.peerClient = peerClient;
+  constructor(config) {
+    if (!config.grapeUrl) {
+      Logger.error("Grape URL must be defined");
+      throw new Error("Grape URL must be defined");
+    }
+
+    const link = new Link({
+      grape: config.grapeUrl,
+    });
+    link.start();
+
+    this.peerClient = new PeerRPCClient(link, {});
+    this.peerClient.init();
+
+    this.peerServer = new PeerRPCServer(link, {
+      timeout: 300000,
+    });
+    this.peerServer.init();
+
+    this.port = config.port;
+  }
+
+  /**
+   * Starts the server to listen for incoming requests on the network.
+   */
+  startServer() {
+    this.peerServer.listen(this.port);
+    Logger.info(`Server listening on port ${this.port}`);
   }
 
   /**
    * Sends an order to the network (to be received by other nodes).
-   * @param {Order} order - The order object to be sent.
-   * @param {Function} callback - The callback function to handle the response or error.
    */
   sendOrder(order, callback) {
-    Logger.info(`Sending order to the network: ${order.toString()}`);
-
-    // Convert the order object to a plain JSON object for transmission
     const orderData = {
       type: order.type,
       price: order.price,
@@ -30,7 +52,6 @@ class NetworkManager {
       orderId: order.orderId,
     };
 
-    // Perform an RPC request to the network to propagate the order
     this.peerClient.request(
       "exchange_order",
       orderData,
@@ -38,7 +59,7 @@ class NetworkManager {
       (err, response) => {
         if (err) {
           Logger.error(`Error sending order to the network: ${err.message}`);
-          return callback(err, null);
+          return callback(err);
         }
 
         Logger.info(`Order sent successfully: ${response}`);
@@ -49,28 +70,18 @@ class NetworkManager {
 
   /**
    * Listens for incoming orders from other nodes in the network.
-   * @param {Function} callback - The callback function to handle the received order.
    */
   listenForOrders(callback) {
-    Logger.info("Listening for incoming orders from the network...");
-
-    // Listen for incoming RPC requests (orders) from other nodes
-    this.peerClient.listen("exchange_order", (err, orderData) => {
-      if (err) {
-        Logger.error(`Error receiving order from the network: ${err.message}`);
-        return callback(err, null);
-      }
+    this.peerServer.on("request", (rid, key, payload, handler) => {
+      if (key !== "exchange_order") return;
 
       Logger.info(
-        `Received order from the network: ${JSON.stringify(orderData)}`
+        `Received order from the network: ${JSON.stringify(payload)}`
       );
-
-      // Convert the plain JSON object back into an Order instance
       const Order = require("./Order");
-      const receivedOrder = new Order(orderData);
-
-      // Invoke the callback with the received order
+      const receivedOrder = new Order(payload);
       callback(null, receivedOrder);
+      handler.reply(null, "Order received");
     });
   }
 }
