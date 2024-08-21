@@ -5,6 +5,7 @@ const Logger = require("../utils/Logger");
 const { PeerRPCServer, PeerRPCClient } = require("grenache-nodejs-http");
 const Link = require("grenache-nodejs-link");
 const config = require("../config/grenache-config");
+const _ = require("lodash");
 
 class NetworkManager {
   /**
@@ -32,7 +33,10 @@ class NetworkManager {
 
     // Create and start the server service on a specified port
     this.service = this.peerServer.transport("server");
-    this.service.listen(1337, () => {
+
+    // Generate a random port number between 1024 and 2024
+    const randomPort = _.random(1024, 2024);
+    this.service.listen(randomPort, () => {
       console.log("Server listening on port 1337");
     });
   }
