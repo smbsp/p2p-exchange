@@ -39,8 +39,6 @@ describe("ClientNode", () => {
   });
 
   afterEach(() => {
-    // Cleanup code to stop the client node
-    clientNode.stop();
     process.removeAllListeners("submitOrder");
   });
 
