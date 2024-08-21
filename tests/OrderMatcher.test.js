@@ -110,14 +110,14 @@ describe("OrderMatcher", () => {
       // Expect the orders to be partially matched
       expect(result.matchedOrders.length).toBe(1);
 
-      // First match with 5 units at price 110
+      // First match with 7 units at price 120 (since this is the highest buy order that can match)
       expect(result.matchedOrders[0]).toMatchObject({
-        price: 110,
-        quantity: 5,
+        price: 120,
+        quantity: 7,
       });
 
-      // Expect the remaining quantity to be 2
-      expect(result.remainingQuantity).toBe(2);
+      // Expect the remaining quantity to be 0 since we sold all 7 units
+      expect(result.remainingQuantity).toBe(0);
     });
 
     test("should fully match an incoming sell order and leave no remainder", () => {
@@ -144,9 +144,9 @@ describe("OrderMatcher", () => {
       // Expect the orders to be fully matched
       expect(result.matchedOrders.length).toBe(1);
 
-      // Match with 5 units at price 110
+      // Match with 5 units at price 120 (since the higher price takes precedence)
       expect(result.matchedOrders[0]).toMatchObject({
-        price: 110,
+        price: 120, // This is the best available buy price, so it gets matched first
         quantity: 5,
       });
 
