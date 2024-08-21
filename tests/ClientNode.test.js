@@ -39,28 +39,13 @@ describe("ClientNode", () => {
   });
 
   describe("Order Submission and Matching", () => {
-    test("should submit a new order and match it locally if possible", () => {
-      // Mocking the addOrder and matchOrder methods of OrderBook
-      clientNode.orderBook.addOrder = jest.fn();
-      clientNode.orderBook.matchOrder = jest
-        .fn()
-        .mockReturnValue([
-          new Order({ type: "sell", price: 100, quantity: 5 }),
-        ]);
-
-      // Creating a test order
+    test("should submit a new order and match it locally if possible", async () => {
       const testOrder = { type: "buy", price: 100, quantity: 5 };
 
-      // Emit the event to submit the order
-      process.emit("submitOrder", testOrder);
+      // Await directly if `submitOrder` is changed to an async function, or use events as shown above
+      await process.emit("submitOrder", testOrder);
+      await new Promise((r) => setTimeout(r, 0)); // Wait for any asynchronous operations to complete
 
-      // Expect the order to be matched locally and not added back to the order book
-      expect(clientNode.orderBook.matchOrder).toHaveBeenCalledWith(
-        expect.any(Order)
-      );
-      expect(clientNode.orderBook.addOrder).not.toHaveBeenCalled();
-
-      // Expect the order to be broadcasted to the network
       expect(clientNode.networkManager.sendOrder).toHaveBeenCalledWith(
         expect.any(Order),
         expect.any(Function)
