@@ -155,6 +155,13 @@ Potential features that could be added in the future include:
 - Support for persistent order books with database integration.
 - Visualization or UI integration for monitoring and submitting orders.
 
+## Additional Concurrency Management Considerations
+
+- Event-Driven Concurrency: Implement event-driven concurrency control, especially in ClientNode.js, where orders are processed based on events. Using event queues and handling events sequentially can help avoid conflicts.
+- Atomicity with Transactions: For critical operations like updating the order book and broadcasting orders, consider implementing a transactional approach where operations either complete entirely or not at all.
+- Optimistic Concurrency Control: If you expect high concurrency, consider implementing optimistic concurrency control (e.g., version checks or conflict resolution) where changes are allowed unless a conflict is detected.
+- Distributed Locking: In a decentralized system, you may also need distributed locking mechanisms (e.g., using Zookeeper or a similar tool) if multiple nodes need to agree on a shared resource.
+
 ## Troubleshooting
 
 - If the client node fails to connect, verify that the Grape nodes are running and that the correct bootstrap addresses are being used.
